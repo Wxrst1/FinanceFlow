@@ -5,6 +5,8 @@ export const TransactionTypeSchema = z.enum(['income', 'expense']);
 export const SubscriptionPlanSchema = z.enum(['starter', 'free', 'pro', 'business']);
 export const DebtStrategySchema = z.enum(['snowball', 'avalanche']);
 
+export type DebtStrategy = z.infer<typeof DebtStrategySchema>;
+
 // --- Schemas ---
 
 export const TransactionSchema = z.object({
