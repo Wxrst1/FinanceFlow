@@ -1,4 +1,5 @@
 
+
 export type TransactionType = 'income' | 'expense';
 
 export type SubscriptionPlan = 'starter' | 'free' | 'pro' | 'business';
@@ -55,7 +56,7 @@ export interface Transaction {
   id: string;
   description: string;
   amount: number;
-  date: string;
+  date: string; // ISO string
   category: string;
   type: TransactionType;
   tags?: string[];
@@ -64,6 +65,10 @@ export interface Transaction {
   transferId?: string;
   isPersisted?: boolean;
   workspaceId?: string | null;
+  // Sync fields
+  version?: number;
+  updatedAt?: string;
+  deletedAt?: string | null;
 }
 
 export interface Category {
@@ -81,6 +86,10 @@ export interface Goal {
   deadline?: string;
   color: string;
   workspaceId?: string | null;
+  // Sync fields
+  version?: number;
+  updatedAt?: string;
+  deletedAt?: string | null;
 }
 
 export interface Budget {
@@ -180,6 +189,10 @@ export interface BankAccount {
   connected?: boolean;
   providerAccountId?: string;
   accessToken?: string;
+  // Sync fields
+  version?: number;
+  updatedAt?: string;
+  deletedAt?: string | null;
 }
 
 export type AssetType = 'real_estate' | 'vehicle' | 'investment' | 'crypto' | 'cash' | 'other' | 'liability';
@@ -382,9 +395,25 @@ export interface Debt {
   dueDate: number;
   category?: string;
   workspaceId?: string | null;
+  // Sync fields
+  version?: number;
+  updatedAt?: string;
+  deletedAt?: string | null;
 }
 
 export type DebtStrategy = 'snowball' | 'avalanche';
+
+export interface PayoffProjection {
+  debtFreeDate: Date;
+  totalInterestPaid: number;
+  monthsToPayoff: number;
+  monthlyAmortization: {
+    month: number;
+    balance: number;
+    interestPaid: number;
+    principalPaid: number;
+  }[];
+}
 
 export interface FinanceState {
   transactions: Transaction[];
