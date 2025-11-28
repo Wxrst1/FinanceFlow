@@ -8,6 +8,11 @@
     <title>FinanceFlow | Gestão Financeira Profissional</title>
     <meta name="description" content="Dashboard financeiro pessoal com IA e integração bancária.">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- React Grid Layout Styles (Critical for Dashboard) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/react-grid-layout/1.4.4/css/styles.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/react-resizable/3.0.5/css/styles.min.css" />
+
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
       tailwind.config = {
@@ -36,6 +41,13 @@
       ::-webkit-scrollbar-track { background: #18181b; }
       ::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 4px; }
       ::-webkit-scrollbar-thumb:hover { background: #52525b; }
+      
+      /* Grid Layout Fixes */
+      .react-grid-item.react-grid-placeholder {
+        background: rgba(34, 197, 94, 0.2) !important;
+        border-radius: 12px;
+        opacity: 0.5;
+      }
     </style>
   <script type="importmap">
 {

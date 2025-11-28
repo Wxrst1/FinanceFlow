@@ -1,4 +1,3 @@
-
 import { Debt } from '@/types';
 import { DebtSchema } from '@/core/schema';
 import { supabase } from '@/services/supabase';

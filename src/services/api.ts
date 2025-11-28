@@ -1,4 +1,3 @@
-
 import { Transaction, Goal, Automation, User, BankAccount, SubscriptionPlan, FixedExpense, CurrencyCode, LanguageCode, Budget, Subscription, RecurringTransaction, Asset, Workspace, MonthlyReport, Investment, WorkspaceInvite, WorkspaceMember, WorkspaceRole } from "@/types";
 import { supabase } from "@/services/supabase";
 import { secureCall } from "@/lib/resilience";

@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect, ReactNode, useMemo, useCallback } from 'react';
 import { 
     Transaction, BankAccount, Asset, User, Goal, 
@@ -165,40 +164,44 @@ export const FinanceProvider = ({ children }: { children?: ReactNode }) => {
 
   // Function to seed and return data if empty
   const ensureData = async (userId: string) => {
-      let accountsList = await OfflineService.getAll<BankAccount>('accounts');
-      
-      if (accountsList.length === 0) {
-          console.log("Empty DB detected. Seeding Demo Data...");
-          
-          // Seed Data Function
-          const seed = async (table: any, items: any[]) => {
-              for (const item of items) {
-                  await OfflineService.saveItem(table, { ...item, id: item.id || generateId(), workspaceId: userId });
-              }
-          };
+      try {
+        let accountsList = await OfflineService.getAll<BankAccount>('accounts');
+        
+        if (accountsList.length === 0) {
+            console.log("Empty DB detected. Seeding Demo Data...");
+            
+            // Seed Data Function
+            const seed = async (table: any, items: any[]) => {
+                for (const item of items) {
+                    await OfflineService.saveItem(table, { ...item, id: item.id || generateId(), workspaceId: userId });
+                }
+            };
 
-          await seed('accounts', DemoData.accounts);
-          await seed('transactions', DemoData.transactions);
-          await seed('goals', DemoData.goals);
-          await seed('budgets', DemoData.budgets);
-          await seed('subscriptions', DemoData.subscriptions);
-          await seed('fixed_expenses', DemoData.fixedExpenses);
-          await seed('investments', DemoData.investments);
-          await seed('automations', DemoData.automations);
-          await seed('assets', DemoData.assets);
-          
-          // Return the demo data directly to avoid a second fetch
-          return {
-              accounts: DemoData.accounts,
-              transactions: DemoData.transactions as Transaction[],
-              goals: DemoData.goals,
-              budgets: DemoData.budgets,
-              subscriptions: DemoData.subscriptions,
-              fixedExpenses: DemoData.fixedExpenses,
-              investments: DemoData.investments,
-              automations: DemoData.automations,
-              assets: DemoData.assets
-          };
+            await seed('accounts', DemoData.accounts);
+            await seed('transactions', DemoData.transactions);
+            await seed('goals', DemoData.goals);
+            await seed('budgets', DemoData.budgets);
+            await seed('subscriptions', DemoData.subscriptions);
+            await seed('fixed_expenses', DemoData.fixedExpenses);
+            await seed('investments', DemoData.investments);
+            await seed('automations', DemoData.automations);
+            await seed('assets', DemoData.assets);
+            
+            // Return the demo data directly to avoid a second fetch
+            return {
+                accounts: DemoData.accounts,
+                transactions: DemoData.transactions as Transaction[],
+                goals: DemoData.goals,
+                budgets: DemoData.budgets,
+                subscriptions: DemoData.subscriptions,
+                fixedExpenses: DemoData.fixedExpenses,
+                investments: DemoData.investments,
+                automations: DemoData.automations,
+                assets: DemoData.assets
+            };
+        }
+      } catch (e) {
+          console.warn("Seeding failed or not needed", e);
       }
       return null; // Data exists
   };
@@ -276,6 +279,12 @@ export const FinanceProvider = ({ children }: { children?: ReactNode }) => {
                 const u = await ApiService.auth.getCurrentUser();
                 if (u) {
                     setUser(u);
+                    setIsAuthenticated(true);
+                } else {
+                    // Force Demo User if no auth (Offline First Experience)
+                    // This ensures the dashboard is never stuck on loading if API fails
+                    const demo = { id: 'local_user', name: 'Convidado', email: 'demo@financeflow.app', plan: 'pro' as const };
+                    setUser(demo);
                     setIsAuthenticated(true);
                 }
             }

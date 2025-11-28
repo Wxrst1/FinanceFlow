@@ -1,29 +1,28 @@
 
 import { Transaction, FixedExpense, Subscription, RecurringTransaction } from "../types";
 
-export interface CalendarTransaction {
-    id: string;
-    description: string;
-    amount: number;
-    type: 'income' | 'expense';
-    category: string;
-    isProjected: boolean;
-}
-
 export interface CalendarDayData {
     date: Date;
     day: number;
     isToday: boolean;
     isFuture: boolean;
-    isPadding: boolean;
+    isPadding: boolean; 
     income: number;
     expense: number;
     balance: number;
     transactions: CalendarTransaction[];
 }
 
+export interface CalendarTransaction {
+    id: string;
+    description: string;
+    amount: number;
+    type: 'income' | 'expense';
+    category: string;
+    isProjected: boolean; 
+}
+
 export const CalendarService = {
-    
     getMonthData: (
         year: number, 
         month: number, 
@@ -38,11 +37,9 @@ export const CalendarService = {
         const firstDayOfMonth = new Date(year, month, 1);
         const lastDayOfMonth = new Date(year, month + 1, 0);
         
-        // Start date (go back to previous Sunday)
         const startDate = new Date(firstDayOfMonth);
-        startDate.setDate(startDate.getDate() - startDate.getDay());
+        startDate.setDate(startDate.getDate() - startDate.getDay()); 
 
-        // End date (go forward to next Saturday to fill grid)
         const endDate = new Date(lastDayOfMonth);
         if (endDate.getDay() < 6) {
             endDate.setDate(endDate.getDate() + (6 - endDate.getDay()));
@@ -54,9 +51,7 @@ export const CalendarService = {
         while (iterDate <= endDate) {
             const isPadding = iterDate.getMonth() !== month;
             const isFuture = iterDate > today;
-            const isToday = iterDate.getDate() === today.getDate() && 
-                            iterDate.getMonth() === today.getMonth() && 
-                            iterDate.getFullYear() === today.getFullYear();
+            const isToday = iterDate.getTime() === today.getTime();
             const dayNum = iterDate.getDate();
             
             const dayTransactions: CalendarTransaction[] = [];
@@ -80,9 +75,9 @@ export const CalendarService = {
                 });
             });
 
-            // 2. Projected Transactions (Future/Today only)
+            // 2. Projected Transactions
             if (isFuture || isToday) {
-                // A. Fixed Expenses
+                // Fixed Expenses
                 fixedExpenses.forEach(f => {
                     if (f.day === dayNum) {
                         const exists = realTxs.some(t => Math.abs(t.amount - f.amount) < 0.01);
@@ -99,20 +94,16 @@ export const CalendarService = {
                     }
                 });
 
-                // B. Subscriptions
+                // Subscriptions
                 subscriptions.forEach(s => {
                     if (!s.active) return;
-                    
                     let matches = false;
                     if (s.billingCycle === 'monthly') {
-                        // Check if payment date day matches current iterator day
-                        const payDay = new Date(s.nextPaymentDate).getDate();
-                        matches = payDay === dayNum;
+                        const subDay = new Date(s.nextPaymentDate).getDate();
+                        matches = subDay === dayNum;
                     } else {
                         const nextPay = new Date(s.nextPaymentDate);
-                        matches = nextPay.getDate() === dayNum && 
-                                  nextPay.getMonth() === iterDate.getMonth() && 
-                                  nextPay.getFullYear() === iterDate.getFullYear();
+                        matches = nextPay.getDate() === dayNum && nextPay.getMonth() === iterDate.getMonth();
                     }
 
                     if (matches) {
@@ -127,24 +118,6 @@ export const CalendarService = {
                                 isProjected: true
                             });
                         }
-                    }
-                });
-
-                // C. Recurring
-                recurring.forEach(r => {
-                    if (!r.active) return;
-                    if (r.dayOfMonth === dayNum) {
-                         const exists = realTxs.some(t => Math.abs(t.amount - r.amount) < 0.01);
-                         if (!exists) {
-                             dayTransactions.push({
-                                 id: `rec_${r.id}_${dayNum}`,
-                                 description: r.description,
-                                 amount: r.amount,
-                                 type: r.type,
-                                 category: r.category,
-                                 isProjected: true
-                             });
-                         }
                     }
                 });
             }
