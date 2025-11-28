@@ -1,5 +1,5 @@
-import { Transaction, BankAccount, Goal, Budget, Subscription, FixedExpense, Investment, Automation, RecurringTransaction, Asset } from "@/types";
-import { generateId } from "@/utils";
+
+import { BankAccount, Goal, Budget, Subscription, FixedExpense, Investment, Automation, Asset } from "@/types";
 
 const getDaysAgo = (days: number) => {
     const date = new Date();
@@ -15,14 +15,14 @@ export const DemoData = {
     ] as BankAccount[],
 
     transactions: [
-        { description: 'Salário Mensal', amount: 1800.00, date: getDaysAgo(2), category: 'Salário', type: 'income', accountId: 'acc_1', tags: ['Trabalho'] },
-        { description: 'Continente Bom Dia', amount: 45.20, date: getDaysAgo(1), category: 'Alimentação', type: 'expense', accountId: 'acc_1', tags: ['Supermercado'] },
-        { description: 'Uber Trip', amount: 8.50, date: getDaysAgo(3), category: 'Transporte', type: 'expense', accountId: 'acc_2', tags: [] },
-        { description: 'Netflix', amount: 15.99, date: getDaysAgo(5), category: 'Assinaturas', type: 'expense', accountId: 'acc_2', tags: [] },
-        { description: 'Renda Casa', amount: 650.00, date: getDaysAgo(10), category: 'Habitação', type: 'expense', accountId: 'acc_1', tags: ['Fixo'] },
-        { description: 'Ginásio Fitness', amount: 35.00, date: getDaysAgo(12), category: 'Saúde', type: 'expense', accountId: 'acc_1', tags: ['Saúde'] },
-        { description: 'Jantar Fora', amount: 60.00, date: getDaysAgo(4), category: 'Lazer', type: 'expense', accountId: 'acc_2', tags: [] },
-        { description: 'Combustível', amount: 50.00, date: getDaysAgo(7), category: 'Transporte', type: 'expense', accountId: 'acc_1', tags: [] },
+        { id: 'tx_1', description: 'Salário Mensal', amount: 1800.00, date: getDaysAgo(2), category: 'Salário', type: 'income', accountId: 'acc_1', tags: ['Trabalho'] },
+        { id: 'tx_2', description: 'Continente Bom Dia', amount: 45.20, date: getDaysAgo(1), category: 'Alimentação', type: 'expense', accountId: 'acc_1', tags: ['Supermercado'] },
+        { id: 'tx_3', description: 'Uber Trip', amount: 8.50, date: getDaysAgo(3), category: 'Transporte', type: 'expense', accountId: 'acc_2', tags: [] },
+        { id: 'tx_4', description: 'Netflix', amount: 15.99, date: getDaysAgo(5), category: 'Assinaturas', type: 'expense', accountId: 'acc_2', tags: [] },
+        { id: 'tx_5', description: 'Renda Casa', amount: 650.00, date: getDaysAgo(10), category: 'Habitação', type: 'expense', accountId: 'acc_1', tags: ['Fixo'] },
+        { id: 'tx_6', description: 'Ginásio Fitness', amount: 35.00, date: getDaysAgo(12), category: 'Saúde', type: 'expense', accountId: 'acc_1', tags: ['Saúde'] },
+        { id: 'tx_7', description: 'Jantar Fora', amount: 60.00, date: getDaysAgo(4), category: 'Lazer', type: 'expense', accountId: 'acc_2', tags: [] },
+        { id: 'tx_8', description: 'Combustível', amount: 50.00, date: getDaysAgo(7), category: 'Transporte', type: 'expense', accountId: 'acc_1', tags: [] },
     ] as any[],
 
     goals: [

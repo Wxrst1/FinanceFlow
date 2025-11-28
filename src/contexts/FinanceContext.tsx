@@ -137,39 +137,10 @@ export const FinanceProvider = ({ children }: { children?: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isAuthLoading, setIsAuthLoading] = useState(true);
-  const [globalBudget, setGlobalBudget] = useState(2000); // Global simple budget
+  const [globalBudget, setGlobalBudget] = useState(2000); 
 
   const currency = user?.currency || 'EUR';
   const language = user?.language || 'pt';
-
-  // --- SEED DATA LOGIC ---
-  const seedDataIfEmpty = async (userId: string) => {
-      const accountsList = await OfflineService.getAll<BankAccount>('accounts');
-      const hasAccounts = accountsList.length > 0;
-      
-      if (!hasAccounts) {
-          console.log("Seeding Demo Data...");
-          
-          const saveAll = async (table: any, items: any[]) => {
-              for (const item of items) {
-                  await OfflineService.saveItem(table, { ...item, id: item.id || generateId(), workspaceId: userId });
-              }
-          };
-
-          await saveAll('accounts', DemoData.accounts);
-          await saveAll('transactions', DemoData.transactions);
-          await saveAll('goals', DemoData.goals);
-          await saveAll('budgets', DemoData.budgets);
-          await saveAll('subscriptions', DemoData.subscriptions);
-          await saveAll('fixed_expenses', DemoData.fixedExpenses);
-          await saveAll('investments', DemoData.investments);
-          await saveAll('automations', DemoData.automations);
-          await saveAll('assets', DemoData.assets);
-          
-          return true; 
-      }
-      return false;
-  };
 
   const updatePreferences = async (newCurrency: CurrencyCode, newLanguage: LanguageCode) => {
       if (user) {
@@ -192,47 +163,98 @@ export const FinanceProvider = ({ children }: { children?: ReactNode }) => {
     return FinancialEngine.analyzeRisk(transactions as any, accounts as any, monthlyFixed);
   }, [transactions, accounts, fixedExpenses]);
 
+  // Function to seed and return data if empty
+  const ensureData = async (userId: string) => {
+      let accountsList = await OfflineService.getAll<BankAccount>('accounts');
+      
+      if (accountsList.length === 0) {
+          console.log("Empty DB detected. Seeding Demo Data...");
+          
+          // Seed Data Function
+          const seed = async (table: any, items: any[]) => {
+              for (const item of items) {
+                  await OfflineService.saveItem(table, { ...item, id: item.id || generateId(), workspaceId: userId });
+              }
+          };
+
+          await seed('accounts', DemoData.accounts);
+          await seed('transactions', DemoData.transactions);
+          await seed('goals', DemoData.goals);
+          await seed('budgets', DemoData.budgets);
+          await seed('subscriptions', DemoData.subscriptions);
+          await seed('fixed_expenses', DemoData.fixedExpenses);
+          await seed('investments', DemoData.investments);
+          await seed('automations', DemoData.automations);
+          await seed('assets', DemoData.assets);
+          
+          // Return the demo data directly to avoid a second fetch
+          return {
+              accounts: DemoData.accounts,
+              transactions: DemoData.transactions as Transaction[],
+              goals: DemoData.goals,
+              budgets: DemoData.budgets,
+              subscriptions: DemoData.subscriptions,
+              fixedExpenses: DemoData.fixedExpenses,
+              investments: DemoData.investments,
+              automations: DemoData.automations,
+              assets: DemoData.assets
+          };
+      }
+      return null; // Data exists
+  };
+
   const loadData = useCallback(async () => {
       if (!user) return;
       try {
           const userId = user.id || 'local_user';
           
-          // Attempt Seed (Safe to call, checks for existence)
-          await seedDataIfEmpty(userId);
+          // 1. Check and Seed if needed
+          const seededData = await ensureData(userId);
 
-          // Safe loading wrapper
-          const safeLoad = async <T,>(fn: () => Promise<T>, fallback: T): Promise<T> => {
-              try { return await fn(); } 
-              catch (e) { return fallback; }
-          };
+          if (seededData) {
+              // 2a. Use Seeded Data Immediately
+              setTransactions(seededData.transactions);
+              setAccounts(seededData.accounts);
+              setAssets(seededData.assets);
+              setFixedExpenses(seededData.fixedExpenses);
+              setGoals(seededData.goals);
+              setBudgets(seededData.budgets);
+              setSubscriptions(seededData.subscriptions);
+              setAutomations(seededData.automations);
+              setInvestments(seededData.investments);
+          } else {
+              // 2b. Fetch Existing Data
+              const safeLoad = async <T,>(fn: () => Promise<T>, fallback: T): Promise<T> => {
+                  try { return await fn(); } 
+                  catch (e) { return fallback; }
+              };
 
-          // Parallel Fetching with Resilience
-          // NOTE: Only map what is destructured. userDebts needs its own call.
-          const [txs, accs, assts, fixed, userGoals, userDebts, userBudgets, userSubs, userAuto, userInv, userRec] = await Promise.all([
-              safeLoad(() => TransactionService.getAll(userId), []),
-              safeLoad(() => ApiService.getAccounts(userId), []),
-              safeLoad(() => ApiService.getAssets(userId), []),
-              safeLoad(() => ApiService.getFixedExpenses(userId), []),
-              safeLoad(() => ApiService.getGoals(userId), []),
-              safeLoad(() => DebtService.getAll(userId), []),
-              safeLoad(() => ApiService.getBudgets(userId), []),
-              safeLoad(() => ApiService.getSubscriptions(userId), []),
-              safeLoad(() => ApiService.getAutomations(userId), []),
-              safeLoad(() => ApiService.getInvestments(userId), []),
-              safeLoad(() => ApiService.getRecurringTransactions(userId), []),
-          ]);
+              const [txs, accs, assts, fixed, userGoals, userDebts, userBudgets, userSubs, userAuto, userInv, userRec] = await Promise.all([
+                  safeLoad(() => TransactionService.getAll(userId), []),
+                  safeLoad(() => ApiService.getAccounts(userId), []),
+                  safeLoad(() => ApiService.getAssets(userId), []),
+                  safeLoad(() => ApiService.getFixedExpenses(userId), []),
+                  safeLoad(() => ApiService.getGoals(userId), []),
+                  safeLoad(() => DebtService.getAll(userId), []),
+                  safeLoad(() => ApiService.getBudgets(userId), []),
+                  safeLoad(() => ApiService.getSubscriptions(userId), []),
+                  safeLoad(() => ApiService.getAutomations(userId), []),
+                  safeLoad(() => ApiService.getInvestments(userId), []),
+                  safeLoad(() => ApiService.getRecurringTransactions(userId), []),
+              ]);
 
-          setTransactions(txs);
-          setAccounts(accs);
-          setAssets(assts);
-          setFixedExpenses(fixed);
-          setGoals(userGoals);
-          setDebts(userDebts);
-          setBudgets(userBudgets);
-          setSubscriptions(userSubs);
-          setAutomations(userAuto);
-          setInvestments(userInv);
-          setRecurringTransactions(userRec);
+              setTransactions(txs);
+              setAccounts(accs);
+              setAssets(assts);
+              setFixedExpenses(fixed);
+              setGoals(userGoals);
+              setDebts(userDebts);
+              setBudgets(userBudgets);
+              setSubscriptions(userSubs);
+              setAutomations(userAuto);
+              setInvestments(userInv);
+              setRecurringTransactions(userRec);
+          }
 
       } catch (e) {
           console.error("Critical Data Load Failure", e);
@@ -272,7 +294,6 @@ export const FinanceProvider = ({ children }: { children?: ReactNode }) => {
       try {
           await ApiService.auth.signIn(email, pass);
       } catch (e) {
-          // Fallback Demo User for Preview/Offline
           const demoUser = { id: 'demo_user', email, name: 'Demo User', plan: 'pro' as const };
           localStorage.setItem('financeflow_user', JSON.stringify(demoUser));
           setUser(demoUser);
@@ -377,7 +398,6 @@ export const FinanceProvider = ({ children }: { children?: ReactNode }) => {
   };
   const updateBudget = async (amount: number) => {
       setGlobalBudget(amount);
-      // Persist logic needed
   };
 
   // --- Subscriptions ---
@@ -495,10 +515,8 @@ export const FinanceProvider = ({ children }: { children?: ReactNode }) => {
       };
   };
 
-  // Bank Data Simulator
   const refreshBankData = async (account: BankAccount) => {
       await new Promise(resolve => setTimeout(resolve, 2000));
-      // Mock logic: add small interest or random transaction
       const randomAmount = Math.random() * 50;
       const newTx: Transaction = {
           id: generateId(),

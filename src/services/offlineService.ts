@@ -1,4 +1,3 @@
-
 import { Transaction, BankAccount, Goal, Debt } from "@/types";
 
 const DB_NAME = 'financeflow_db';

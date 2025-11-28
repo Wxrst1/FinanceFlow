@@ -1,5 +1,3 @@
-
-
 export type TransactionType = 'income' | 'expense';
 
 export type SubscriptionPlan = 'starter' | 'free' | 'pro' | 'business';
